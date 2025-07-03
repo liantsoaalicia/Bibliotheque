@@ -17,8 +17,15 @@ import com.bibliotheque.services.PretService;
 import com.bibliotheque.services.ExemplaireService;
 import com.bibliotheque.services.AdherantService;
 import com.bibliotheque.services.TypePretService;
+import com.bibliotheque.services.PretConfigService;
+import com.bibliotheque.services.PenaliteConfigService;
+import com.bibliotheque.services.AdherantPenaliteService;
+import com.bibliotheque.models.PretConfig;
+import com.bibliotheque.models.PenaliteConfig;
+import com.bibliotheque.models.AdherantPenalite;
 import java.util.List;
 import java.util.Date;
+import java.util.Calendar;
 
 @Controller
 @RequestMapping("/pret")
@@ -28,12 +35,18 @@ public class PretController {
     private final ExemplaireService exemplaireService;
     private final TypePretService typePretService;
     private final PretService pretService;
+    private final PretConfigService pretConfigService;
+    private final PenaliteConfigService penaliteConfigService;
+    private final AdherantPenaliteService adherantPenaliteService;
 
-    public PretController(AdherantService adherantService, ExemplaireService exemplaireService, TypePretService typePretService, PretService pretService) {
+    public PretController(AdherantService adherantService, ExemplaireService exemplaireService, TypePretService typePretService, PretService pretService, PretConfigService pretConfigService, PenaliteConfigService penaliteConfigService, AdherantPenaliteService adherantPenaliteService) {
         this.adherantService = adherantService;
         this.exemplaireService = exemplaireService;
         this.typePretService = typePretService;
         this.pretService = pretService;
+        this.pretConfigService = pretConfigService;
+        this.penaliteConfigService = penaliteConfigService;
+        this.adherantPenaliteService = adherantPenaliteService;
     }
 
     @GetMapping("/form")
@@ -67,7 +80,24 @@ public class PretController {
         if (pret != null) {
             pret.setDateRetour(dateRetour);
             pretService.save(pret);
-            model.addAttribute("message", "Pret retourne avec succes");
+            // Calcul de la date de retour prévue
+            Date datePrevue = pretService.getDateRetourPrevue(pret);
+            if (datePrevue != null && dateRetour.after(datePrevue)) {
+                // Pénalité à appliquer
+                PenaliteConfig penaliteConfig = penaliteConfigService.findByProfil(pret.getAdherant().getProfil());
+                int nbJourPenalite = penaliteConfig != null ? penaliteConfig.getNbJourPenalite() : 7; // défaut 7j
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(dateRetour);
+                cal.add(Calendar.DAY_OF_MONTH, nbJourPenalite);
+                AdherantPenalite penalite = new AdherantPenalite();
+                penalite.setAdherant(pret.getAdherant());
+                penalite.setDateDebut(dateRetour);
+                penalite.setDateFin(cal.getTime());
+                adherantPenaliteService.save(penalite);
+                model.addAttribute("message", "Pénalité appliquée à l'adhérent.");
+            } else {
+                model.addAttribute("message", "Pret retourne avec succes");
+            }
         } else {
             model.addAttribute("error", "Pret pas trouve");
         }

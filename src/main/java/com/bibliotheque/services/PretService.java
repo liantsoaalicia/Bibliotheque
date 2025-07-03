@@ -1,10 +1,14 @@
 package com.bibliotheque.services;
 
 import com.bibliotheque.models.Pret;
+import com.bibliotheque.models.PretConfig;
+import com.bibliotheque.models.Profil;
 import com.bibliotheque.repositories.PretRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +16,8 @@ import java.util.Optional;
 public class PretService {
     @Autowired
     private PretRepository pretRepository;
+    @Autowired
+    private PretConfigService pretConfigService;
 
     public List<Pret> findAll() {
         return pretRepository.findAll();
@@ -31,6 +37,17 @@ public class PretService {
 
     public void deleteById(Integer id) {
         pretRepository.deleteById(id);
+    }
+
+    public Date getDateRetourPrevue(Pret pret) {
+        if (pret == null || pret.getAdherant() == null || pret.getAdherant().getProfil() == null || pret.getDateEmprunt() == null) return null;
+        Profil profil = pret.getAdherant().getProfil();
+        PretConfig config = pretConfigService.findByProfil(profil);
+        if (config == null) return null;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(pret.getDateEmprunt());
+        cal.add(Calendar.DAY_OF_MONTH, config.getNbJourPret());
+        return cal.getTime();
     }
 
 }
