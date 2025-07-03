@@ -69,8 +69,8 @@
                     <ul class="dropdown-menu">
                         <li><a href="#" class="dropdown-item">Emprunts en cours</a></li>
                         <li><a href="#" class="dropdown-item">Nouveau prêt</a></li>
-                        <li><a href="#" class="dropdown-item">Retours</a></li>
-                        <li><a href="#" class="dropdown-item">Historique</a></li>
+                        <%-- <li><a href="#" class="dropdown-item">Retours</a></li>
+                        <li><a href="#" class="dropdown-item">Historique</a></li> --%>
                     </ul>
                 </li>
                 
