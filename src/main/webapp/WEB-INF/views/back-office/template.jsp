@@ -25,7 +25,7 @@
         <nav>
             <ul class="sidebar-nav">
                 <li class="nav-item">
-                    <a href="#" class="nav-link active">
+                    <a href="${pageContext.request.contextPath}/bibliothecaire/accueil" class="nav-link active">
                         <i class="bi bi-house-door"></i>
                         <span>Accueil</span>
                     </a>
@@ -44,10 +44,8 @@
                         <span>Livres</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="#" class="dropdown-item">Tous les livres</a></li>
-                        <li><a href="#" class="dropdown-item">Ajouter un livre</a></li>
-                        <li><a href="#" class="dropdown-item">Catégories</a></li>
-                        <li><a href="#" class="dropdown-item">Auteurs</a></li>
+                        <li><a href="${pageContext.request.contextPath}/livre/list" class="dropdown-item">Tous les livres</a></li>
+                        <li><a href="${pageContext.request.contextPath}/livre/add" class="dropdown-item">Ajouter un livre</a></li>
                     </ul>
                 </li>
                 
@@ -103,7 +101,7 @@
     <div class="main-content" id="mainContent">
         <header class="content-header py-2 px-3 d-flex align-items-center justify-content-between" style="background: #f8f9fa; border-radius: 0.5rem; margin-bottom: 1rem;">
             <div>
-                <h4 class="mb-0">Bienvenue</h4>
+                <h4 class="mb-0">Bienvenue ${bibliothecaire_connecte.nom} </h4>
                 <small class="text-muted">Gérez vos livres et membres</small>
             </div>
             <div class="header-profile d-flex align-items-center gap-2">

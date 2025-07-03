@@ -38,6 +38,12 @@ public class BibliothecaireController {
         }
         return "redirect:/bibliothecaire/form";
     }
+
+    @GetMapping("/accueil") 
+    public String redirectAccueil(Model model) {
+        model.addAttribute("contentPage", "accueil");
+        return "back-office/template";
+    }
     
 
 
