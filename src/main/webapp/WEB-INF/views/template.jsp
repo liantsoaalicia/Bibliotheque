@@ -11,7 +11,7 @@
 <header>
     
 </header>
-
+    
 <main>
     <jsp:include page="${contentPage}.jsp" />
 </main>
