@@ -67,10 +67,10 @@
                         <span>Emprunts</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="#" class="dropdown-item">Emprunts en cours</a></li>
-                        <li><a href="#" class="dropdown-item">Nouveau prêt</a></li>
-                        <li><a href="#" class="dropdown-item">Retours</a></li>
-                        <li><a href="#" class="dropdown-item">Historique</a></li>
+                        <li><a href="${pageContext.request.contextPath}/pret/list" class="dropdown-item">Emprunts en cours</a></li>
+                        <li><a href="${pageContext.request.contextPath}/pret/form" class="dropdown-item">Nouveau prêt</a></li>
+                        <%-- <li><a href="#" class="dropdown-item">Retours</a></li>
+                        <li><a href="#" class="dropdown-item">Historique</a></li> --%>
                     </ul>
                 </li>
                 
