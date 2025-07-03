@@ -33,10 +33,16 @@ public class BibliothecaireController {
         Bibliothecaire loggedInBibliothecaire = bibliothecaireService.findByEmailAndMdp(bibliothecaire.getEmail(), bibliothecaire.getMdp());
         if(loggedInBibliothecaire != null) {
             httpSession.setAttribute("bibliothecaire_connecte", loggedInBibliothecaire);
-            model.addAttribute("contentPage", "back-office/accueil");
-            return "template";
+            model.addAttribute("contentPage", "accueil");
+            return "back-office/template";
         }
         return "redirect:/bibliothecaire/form";
+    }
+
+    @GetMapping("/accueil") 
+    public String redirectAccueil(Model model) {
+        model.addAttribute("contentPage", "accueil");
+        return "back-office/template";
     }
     
 

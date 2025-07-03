@@ -23,6 +23,7 @@ public class Livre {
     @ManyToOne
     @JoinColumn(name = "id_auteur")
     private Auteur auteur;
+    
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getTitre() { return titre; }

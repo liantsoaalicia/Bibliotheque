@@ -1,6 +1,5 @@
 package com.bibliotheque.services;
 
-import com.bibliotheque.models.Adherant;
 import com.bibliotheque.repositories.BibliothecaireRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
