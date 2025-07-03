@@ -52,12 +52,12 @@
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                         <i class="bi bi-people"></i>
-                        <span>Membres</span>
+                        <span>Penalites</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="#" class="dropdown-item">Tous les membres</a></li>
-                        <li><a href="#" class="dropdown-item">Nouveau membre</a></li>
-                        <li><a href="#" class="dropdown-item">Abonnements</a></li>
+                        <li><a href="${pageContext.request.contextPath}/adherantpenalite/list" class="dropdown-item">Liste</a></li>
+                        <%-- <li><a href="#" class="dropdown-item">Nouveau membre</a></li>
+                        <li><a href="#" class="dropdown-item">Abonnements</a></li> --%>
                     </ul>
                 </li>
                 
