@@ -79,14 +79,14 @@
                         <i class="bi bi-graph-up"></i>
                         <span>Statistiques</span>
                     </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="bi bi-gear"></i>
-                        <span>Paramètres</span>
-                    </a>
                 </li> --%>
+                
+                <%-- <li class="nav-item">
+                    <a href="" class="nav-link">
+                        <i class="bi bi-gear"></i>
+                        <span>Reservation a valider</span>
+                    </a>
+                </li>  --%>
                 
                 <%-- <li class="nav-item">
                     <a href="#" class="nav-link">
