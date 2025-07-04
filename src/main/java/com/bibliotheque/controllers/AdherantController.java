@@ -42,6 +42,6 @@ public class AdherantController {
     @GetMapping("/accueil") 
     public String redirectAccueil(Model model) {
         model.addAttribute("contentPage", "accueil");
-        return "back-office/template";
+        return "front-office/template";
     }
 }
