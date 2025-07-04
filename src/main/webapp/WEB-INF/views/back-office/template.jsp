@@ -75,8 +75,8 @@
                 </li>
                 
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="bi bi-graph-up"></i>
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-arrow-repeat"></i>
                         <span>Jours feries</span>
                     </a>
                     <ul class="dropdown-menu">

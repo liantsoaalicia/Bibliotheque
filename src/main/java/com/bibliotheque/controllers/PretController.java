@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Date;
 import java.util.Calendar;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.bibliotheque.services.JourFerieService;
+import com.bibliotheque.models.JourFerie;
 
 @Controller
 @RequestMapping("/pret")
@@ -45,8 +47,9 @@ public class PretController {
     private final AdherantPenaliteService adherantPenaliteService;
     private final StatutService statutService;
     private final ProlongementPretService prolongementPretService;
+    private final JourFerieService jourFerieService;
 
-    public PretController(AdherantService adherantService, ExemplaireService exemplaireService, TypePretService typePretService, PretService pretService, PretConfigService pretConfigService, PenaliteConfigService penaliteConfigService, AdherantPenaliteService adherantPenaliteService, StatutService statutService, ProlongementPretService prolongementPretService) {
+    public PretController(AdherantService adherantService, ExemplaireService exemplaireService, TypePretService typePretService, PretService pretService, PretConfigService pretConfigService, PenaliteConfigService penaliteConfigService, AdherantPenaliteService adherantPenaliteService, StatutService statutService, ProlongementPretService prolongementPretService, JourFerieService jourFerieService) {
         this.adherantService = adherantService;
         this.exemplaireService = exemplaireService;
         this.typePretService = typePretService;
@@ -56,6 +59,7 @@ public class PretController {
         this.adherantPenaliteService = adherantPenaliteService;
         this.statutService = statutService;
         this.prolongementPretService = prolongementPretService;
+        this.jourFerieService = jourFerieService;
     }
 
     @GetMapping("/form")
@@ -84,29 +88,56 @@ public class PretController {
     }
 
     @PostMapping("/return/{id}")
-    public String returnPret(@RequestParam("dateRetour") @org.springframework.format.annotation.DateTimeFormat(pattern = "yyyy-MM-dd") Date dateRetour, @PathVariable Integer id, Model model) {
+    public String returnPret(@RequestParam("dateRetour") @org.springframework.format.annotation.DateTimeFormat(pattern = "yyyy-MM-dd") Date dateRetour,
+                             @PathVariable Integer id,
+                             @RequestParam(value = "choixJourFerie", required = false) String choixJourFerie,
+                             Model model) {
         Pret pret = pretService.findById(id).orElse(null);
-        if (pret != null) {
-            pret.setDateRetour(dateRetour);
-            pretService.save(pret);
-            Date datePrevue = pretService.getDateRetourPrevue(pret);
-            if (datePrevue != null && dateRetour.after(datePrevue)) {
-                PenaliteConfig penaliteConfig = penaliteConfigService.findByProfil(pret.getAdherant().getProfil());
-                int nbJourPenalite = penaliteConfig != null ? penaliteConfig.getNbJourPenalite() : 7; // défaut 7j
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(dateRetour);
-                cal.add(Calendar.DAY_OF_MONTH, nbJourPenalite);
-                AdherantPenalite penalite = new AdherantPenalite();
-                penalite.setAdherant(pret.getAdherant());
-                penalite.setDateDebut(dateRetour);
-                penalite.setDateFin(cal.getTime());
-                adherantPenaliteService.save(penalite);
-                model.addAttribute("message", "Pénalité appliquée à l'adhérent.");
-            } else {
-                model.addAttribute("message", "Pret retourne avec succes");
-            }
-        } else {
+        if (pret == null) {
             model.addAttribute("error", "Pret pas trouve");
+            return "redirect:/pret/list";
+        }
+
+        boolean isJourFerie = jourFerieService.findAll().stream()
+                .anyMatch(jf -> jf.getDateFerie() != null && jf.getDateFerie().equals(dateRetour));
+
+        if (isJourFerie && choixJourFerie == null) {
+            model.addAttribute("pret", pret);
+            model.addAttribute("dateRetour", dateRetour);
+            model.addAttribute("isJourFerie", true);
+            model.addAttribute("contentPage", "pret-choix-jourferie");
+            return "back-office/template";
+        }
+
+        Date dateRetourEffective = dateRetour;
+        if (isJourFerie && choixJourFerie != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(dateRetour);
+            if ("lendemain".equals(choixJourFerie)) {
+                cal.add(Calendar.DAY_OF_MONTH, 1);
+            } else if ("veille".equals(choixJourFerie)) {
+                cal.add(Calendar.DAY_OF_MONTH, -1);
+            }
+            dateRetourEffective = cal.getTime();
+        }
+
+        pret.setDateRetour(dateRetourEffective);
+        pretService.save(pret);
+        Date datePrevue = pretService.getDateRetourPrevue(pret);
+        if (datePrevue != null && dateRetourEffective.after(datePrevue)) {
+            PenaliteConfig penaliteConfig = penaliteConfigService.findByProfil(pret.getAdherant().getProfil());
+            int nbJourPenalite = penaliteConfig != null ? penaliteConfig.getNbJourPenalite() : 7; // défaut 7j
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(dateRetourEffective);
+            cal.add(Calendar.DAY_OF_MONTH, nbJourPenalite);
+            AdherantPenalite penalite = new AdherantPenalite();
+            penalite.setAdherant(pret.getAdherant());
+            penalite.setDateDebut(dateRetourEffective);
+            penalite.setDateFin(cal.getTime());
+            adherantPenaliteService.save(penalite);
+            model.addAttribute("message", "Pénalité appliquée à l'adhérent.");
+        } else {
+            model.addAttribute("message", "Pret retourne avec succes");
         }
         return "redirect:/pret/list";
     }
