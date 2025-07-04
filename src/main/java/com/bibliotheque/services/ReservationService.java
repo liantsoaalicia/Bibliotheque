@@ -20,5 +20,11 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-  
+    public List<Reservation> findByStatut(String libelle) {
+        return reservationRepository.findByStatut(libelle);
+    }
+
+    public Reservation findById(Integer id) {
+        return reservationRepository.findById(id).orElse(null);
+    }
 }
