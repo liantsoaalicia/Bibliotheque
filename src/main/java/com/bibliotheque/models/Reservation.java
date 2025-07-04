@@ -9,6 +9,7 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Temporal(TemporalType.DATE)
+    @org.springframework.format.annotation.DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date dateDebut;
     @Temporal(TemporalType.DATE)
     private Date dateFin;
