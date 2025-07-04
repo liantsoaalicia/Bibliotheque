@@ -2,6 +2,7 @@ package com.bibliotheque.models;
 
 import jakarta.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 public class Pret {
@@ -42,6 +43,14 @@ public class Pret {
     public void setTypePret(TypePret typePret) { this.typePret = typePret; }
     public Date getDateRetourPrevue() { return dateRetourPrevue; }
     public void setDateRetourPrevue(Date dateRetourPrevue) { this.dateRetourPrevue = dateRetourPrevue; }
-    
 
+    @OneToMany(mappedBy = "pret", fetch = FetchType.LAZY)
+    private java.util.List<ProlongementPret> prolongements;
+
+    public java.util.List<ProlongementPret> getProlongements() {
+        return prolongements;
+    }
+    public void setProlongements(java.util.List<ProlongementPret> prolongements) {
+        this.prolongements = prolongements;
+    }
 }

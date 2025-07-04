@@ -1,7 +1,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<table width=700 border=1> 
+<table width=1500 border=1> 
     <tr>
         <th>Id</th>
         <th>Titre</th>

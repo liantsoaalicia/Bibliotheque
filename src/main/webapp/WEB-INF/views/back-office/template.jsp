@@ -31,12 +31,12 @@
                     </a>
                 </li>
                 
-                <li class="nav-item">
+                <%-- <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="bi bi-search"></i>
                         <span>Recherche</span>
                     </a>
-                </li>
+                </li> --%>
                 
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
@@ -74,7 +74,7 @@
                     </ul>
                 </li>
                 
-                <li class="nav-item">
+                <%-- <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="bi bi-graph-up"></i>
                         <span>Statistiques</span>
@@ -86,14 +86,14 @@
                         <i class="bi bi-gear"></i>
                         <span>Paramètres</span>
                     </a>
-                </li>
+                </li> --%>
                 
-                <li class="nav-item">
+                <%-- <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="bi bi-box-arrow-right"></i>
                         <span>Déconnexion</span>
                     </a>
-                </li>
+                </li> --%>
             </ul>
         </nav>
     </div>

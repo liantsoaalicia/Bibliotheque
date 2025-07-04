@@ -8,6 +8,7 @@
         <th>Livre</th>
         <th>Date de pret</th>
         <th>Date de retour prevue</th>
+        <th>Prolonge</th>
         <th>Actions</th>
     </tr>
 
@@ -16,7 +17,25 @@
             <td>${pret.adherant.nom}</td>
             <td>${pret.exemplaire.livre.titre}</td>
             <td>${pret.dateEmprunt}</td>
-            <td>${pret.dateRetourPrevue}</td>
+            <td>
+                <c:choose>
+                    <c:when test="${not empty pret.prolongements}">
+                        <c:set var="dernierProlongement" value="${pret.prolongements[pret.prolongements.size()-1]}" />
+                        ${dernierProlongement.dateFin}
+                    </c:when>
+                    <c:otherwise>
+                        ${pret.dateRetourPrevue}
+                    </c:otherwise>
+                </c:choose>
+            </td>
+            <td>
+                <c:if test="${not empty pret.prolongements}">
+                    <span style="color:green;font-weight:bold;">Oui</span>
+                </c:if>
+                <c:if test="${empty pret.prolongements}">
+                    <span style="color:red;font-weight:bold;">Non</span>
+                </c:if>
+            </td>
             <td>
                 <form:form method="post" action="${pageContext.request.contextPath}/pret/return/${pret.id}">
                     <label>Date de retour : </label>
