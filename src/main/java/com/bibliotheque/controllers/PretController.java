@@ -23,9 +23,14 @@ import com.bibliotheque.services.AdherantPenaliteService;
 import com.bibliotheque.models.PretConfig;
 import com.bibliotheque.models.PenaliteConfig;
 import com.bibliotheque.models.AdherantPenalite;
+import com.bibliotheque.models.Statut;
+import com.bibliotheque.models.ProlongementPret;
+import com.bibliotheque.services.StatutService;
+import com.bibliotheque.services.ProlongementPretService;
 import java.util.List;
 import java.util.Date;
 import java.util.Calendar;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/pret")
@@ -38,8 +43,10 @@ public class PretController {
     private final PretConfigService pretConfigService;
     private final PenaliteConfigService penaliteConfigService;
     private final AdherantPenaliteService adherantPenaliteService;
+    private final StatutService statutService;
+    private final ProlongementPretService prolongementPretService;
 
-    public PretController(AdherantService adherantService, ExemplaireService exemplaireService, TypePretService typePretService, PretService pretService, PretConfigService pretConfigService, PenaliteConfigService penaliteConfigService, AdherantPenaliteService adherantPenaliteService) {
+    public PretController(AdherantService adherantService, ExemplaireService exemplaireService, TypePretService typePretService, PretService pretService, PretConfigService pretConfigService, PenaliteConfigService penaliteConfigService, AdherantPenaliteService adherantPenaliteService, StatutService statutService, ProlongementPretService prolongementPretService) {
         this.adherantService = adherantService;
         this.exemplaireService = exemplaireService;
         this.typePretService = typePretService;
@@ -47,6 +54,8 @@ public class PretController {
         this.pretConfigService = pretConfigService;
         this.penaliteConfigService = penaliteConfigService;
         this.adherantPenaliteService = adherantPenaliteService;
+        this.statutService = statutService;
+        this.prolongementPretService = prolongementPretService;
     }
 
     @GetMapping("/form")
@@ -80,10 +89,8 @@ public class PretController {
         if (pret != null) {
             pret.setDateRetour(dateRetour);
             pretService.save(pret);
-            // Calcul de la date de retour prévue
             Date datePrevue = pretService.getDateRetourPrevue(pret);
             if (datePrevue != null && dateRetour.after(datePrevue)) {
-                // Pénalité à appliquer
                 PenaliteConfig penaliteConfig = penaliteConfigService.findByProfil(pret.getAdherant().getProfil());
                 int nbJourPenalite = penaliteConfig != null ? penaliteConfig.getNbJourPenalite() : 7; // défaut 7j
                 Calendar cal = Calendar.getInstance();
@@ -110,10 +117,12 @@ public class PretController {
         Exemplaire exemplaire = exemplaireService.findById(pret.getExemplaire().getId());
         TypePret typePret = typePretService.findById(pret.getTypePret().getId()).orElse(null);
 
-        boolean quotaPasEncrAtteint = adherantService.quotaPasAtteint(adherant.getId()); // donc afaka 
-        boolean exemplaireReserve = exemplaireService.isExemplaireReserve(exemplaire.getId(), pret.getDateEmprunt()); // tsy afaka
-        boolean reservationRefusee = exemplaireService.isLastReservationRefusee(exemplaire.getId()); // donc afaka 
-        Integer ageAdherant = adherantService.getAgeByAdherantIdAndDate(adherant.getId(), pret.getDateEmprunt()); 
+        System.out.println("Date d'emprunt : " + pret.getDateEmprunt());
+
+        boolean quotaPasEncrAtteint = adherantService.quotaPasAtteint(adherant.getId());
+        boolean exemplaireReserve = exemplaireService.isExemplaireReserve(exemplaire.getId(), pret.getDateEmprunt());
+        boolean reservationRefusee = exemplaireService.isLastReservationRefusee(exemplaire.getId());
+        Integer ageAdherant = adherantService.getAgeByAdherantIdAndDate(adherant.getId(), pret.getDateEmprunt());
         boolean encrAbonne = adherantService.isAbonneByAdherantIdAndDate(adherant.getId(), pret.getDateEmprunt());
         boolean aUnePenalite = adherantService.hasPenaliteAtDate(adherant.getId(), pret.getDateEmprunt());
 
@@ -139,11 +148,64 @@ public class PretController {
             return "back-office/template";
         }
 
+        PretConfig pretconfig = pretConfigService.findByProfil(adherant.getProfil());
+        int nbJourPret = pretconfig.getNbJourPret();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(pret.getDateEmprunt());
+        cal.add(Calendar.DAY_OF_MONTH, nbJourPret);
+        Date nouvelleDateRetourPrevue = cal.getTime();
+
+        pret.setDateRetourPrevue(nouvelleDateRetourPrevue);
         pret.setAdherant(adherant);
         pret.setExemplaire(exemplaire);
         pret.setTypePret(typePret);
         pretService.save(pret);
         return "redirect:/pret/list?pret=Emprunt enregistre avec succes";
+    }
+
+    @GetMapping("/en-cours")
+    public String listPretsByAdherant(Model model, HttpSession session) {
+        Adherant adherant = (Adherant) session.getAttribute("adherant_connecte");
+        List<Pret> prets = pretService.findPretsEnCoursByAdherant(adherant);
+        model.addAttribute("prets", prets);
+        model.addAttribute("adherant", adherant);
+        model.addAttribute("contentPage", "pret-en-cours");
+        return "front-office/template";
+    }
+
+    @PostMapping("/prolonger/{id}")
+    public String prolongerPret(@PathVariable Integer id, 
+    RedirectAttributes redirectAttributes, Model model) {
+        Pret pret = pretService.findById(id).orElse(null);
+        if (pret == null) {
+            model.addAttribute("error", "Pret non trouvé");
+            return "redirect:/pret/en-cours";
+        }
+
+        PretConfig pretconfig = pretConfigService.findByProfil(pret.getAdherant().getProfil());
+        int nbJourPret = pretconfig.getNbJourPret();
+        Date dateFinPret = pret.getDateRetourPrevue();
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateFinPret);
+        cal.add(Calendar.DAY_OF_MONTH, nbJourPret);
+        Date nouvelleDateRetourPrevue = cal.getTime();
+
+        Statut statut = statutService.findByStatut("En cours");
+        String message = "Prolongement en cours de validation";
+
+        ProlongementPret prolongement = new ProlongementPret();
+        prolongement.setPret(pret);
+        prolongement.setDateDebut(dateFinPret);
+        prolongement.setDateFin(nouvelleDateRetourPrevue);
+        prolongement.setDateStatut(new Date());
+        prolongement.setStatut(statut);
+        prolongementPretService.save(prolongement);
+
+        pret.setDateRetourPrevue(nouvelleDateRetourPrevue);
+
+        redirectAttributes.addFlashAttribute("message", message);
+        return "redirect:/pret/en-cours";
     }
 
 }
