@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpSession;
@@ -50,8 +51,46 @@ public class ReservationController {
         reservation.setAdherant(adherant);
         Reservation savedReservation = reservationService.save(reservation);
 
-        model.addAttribute("message", "Reservation effectuee avec succes !");
+        model.addAttribute("message", "Reservation effectuee , en attente de validation");
         model.addAttribute("contentPage", "reservation-form");
         return "front-office/template";
     }
+
+
+    @GetMapping("/list-en-cours")
+    public String list(Model model, @RequestParam(value = "message", required = false) String message, @RequestParam(value = "error", required = false) String error) {
+        List<Reservation> reservations = reservationService.findByStatut("En cours");
+        model.addAttribute("reservations", reservations);
+        if (message != null) model.addAttribute("message", message);
+        if(error != null) model.addAttribute("error", error);
+        model.addAttribute("contentPage", "reservation-list");
+        return "back-office/template";
+    }
+
+    @GetMapping("/valider/{id}")
+    public String validerReservation(@PathVariable("id") Integer id, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        Reservation reservation = reservationService.findById(id);
+        if (reservation != null) {
+            Statut statut = statutService.findByStatut("Accepte");
+            reservation.setStatut(statut);
+            reservation.setDateStatut(new Date());
+            reservationService.save(reservation);
+            redirectAttributes.addFlashAttribute("message", "Reservation validee");
+        } 
+        return "redirect:/reservation/list-en-cours";
+    }
+
+    @GetMapping("/refuser/{id}")
+    public String refuserReservation(@PathVariable("id") Integer id, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        Reservation reservation = reservationService.findById(id);
+        if (reservation != null) {
+            Statut statut = statutService.findByStatut("Refuse");
+            reservation.setStatut(statut);
+            reservation.setDateStatut(new Date());
+            reservationService.save(reservation);
+            redirectAttributes.addFlashAttribute("error", "Reservation refusee");
+        } 
+        return "redirect:/reservation/list-en-cours";
+    }
+
 }

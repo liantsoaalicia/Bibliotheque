@@ -81,12 +81,12 @@
                     </a>
                 </li> --%>
                 
-                <%-- <li class="nav-item">
-                    <a href="" class="nav-link">
+                <li class="nav-item">
+                    <a href="${pageContext.request.contextPath}/reservation/list-en-cours" class="nav-link">
                         <i class="bi bi-gear"></i>
                         <span>Reservation a valider</span>
                     </a>
-                </li>  --%>
+                </li> 
                 
                 <%-- <li class="nav-item">
                     <a href="#" class="nav-link">
