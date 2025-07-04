@@ -30,5 +30,9 @@ public class ExemplaireService {
         return exemplaireRepository.isLastReservationRefused(exemplaireId);
     }
 
+    public List<Exemplaire> findDisponibles() {
+        return exemplaireRepository.findExemplairesDisponibles();
+    }
+
 
 }
