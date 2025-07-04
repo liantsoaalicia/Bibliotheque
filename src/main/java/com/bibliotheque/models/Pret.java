@@ -13,6 +13,8 @@ public class Pret {
     private Date dateEmprunt;
     @Temporal(TemporalType.DATE)
     private Date dateRetour;
+    @Temporal(TemporalType.DATE)
+    private Date dateRetourPrevue;
 
     @ManyToOne
     @JoinColumn(name = "id_exemplaire")
@@ -38,4 +40,8 @@ public class Pret {
     public void setAdherant(Adherant adherant) { this.adherant = adherant; }
     public TypePret getTypePret() { return typePret; }
     public void setTypePret(TypePret typePret) { this.typePret = typePret; }
+    public Date getDateRetourPrevue() { return dateRetourPrevue; }
+    public void setDateRetourPrevue(Date dateRetourPrevue) { this.dateRetourPrevue = dateRetourPrevue; }
+    
+
 }

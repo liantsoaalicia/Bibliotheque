@@ -12,7 +12,8 @@ public interface AdherantRepository extends JpaRepository<Adherant, Integer> {
     @Query("SELECT q.nbExemplaire FROM QuotaExemplaire q WHERE q.profil.id = (SELECT a.profil.id FROM Adherant a WHERE a.id = :adherantId)")
     Integer findNbExemplaireByAdherantId(@Param("adherantId") Integer adherantId);
 
-    @Query("SELECT COUNT(p) FROM Pret p WHERE p.adherant.id = :adherantId AND p.dateRetour IS NULL")
+    // pret en cours (a domicile ihany)
+    @Query("SELECT COUNT(p) FROM Pret p WHERE p.adherant.id = :adherantId AND p.dateRetour IS NULL AND p.typePret.id = 1")
     Integer countPretsEnCoursByAdherantId(@Param("adherantId") Integer adherantId);
 
     @Query("SELECT COUNT(a) > 0 FROM AdherantAbonnement a WHERE a.adherant.id = :adherantId AND :dateToCheck BETWEEN a.dateDebut AND a.dateFin")
