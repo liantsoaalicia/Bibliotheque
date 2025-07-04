@@ -202,7 +202,7 @@ public class PretController {
         prolongement.setStatut(statut);
         prolongementPretService.save(prolongement);
 
-        pret.setDateRetourPrevue(nouvelleDateRetourPrevue);
+        // pret.setDateRetourPrevue(nouvelleDateRetourPrevue);
 
         redirectAttributes.addFlashAttribute("message", message);
         return "redirect:/pret/en-cours";
