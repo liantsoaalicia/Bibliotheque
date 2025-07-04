@@ -74,12 +74,15 @@
                     </ul>
                 </li>
                 
-                <%-- <li class="nav-item">
+                <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="bi bi-graph-up"></i>
-                        <span>Statistiques</span>
+                        <span>Jours feries</span>
                     </a>
-                </li> --%>
+                    <ul class="dropdown-menu">
+                        <li><a href="${pageContext.request.contextPath}/jourferie/list" class="dropdown-item">Liste</a></li>
+                    </ul>
+                </li>
                 
                 <li class="nav-item">
                     <a href="${pageContext.request.contextPath}/reservation/list-en-cours" class="nav-link">
