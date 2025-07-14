@@ -24,8 +24,8 @@ public class AdherantController {
     @GetMapping("/form")
     public String showForm(Model model) {
         model.addAttribute("adherant", new Adherant());
-        model.addAttribute("contentPage", "front-office/adherant-form");
-        return "template";
+        // model.addAttribute("contentPage", "front-office/adherant-form");
+        return "front-office/adherant-form";
     }
 
     @PostMapping("/login")
