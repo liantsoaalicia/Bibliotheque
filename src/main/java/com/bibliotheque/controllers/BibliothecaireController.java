@@ -24,8 +24,8 @@ public class BibliothecaireController {
     @GetMapping("/form")
     public String showForm(Model model) {
         model.addAttribute("bibliothecaire", new Bibliothecaire());
-        model.addAttribute("contentPage", "back-office/bibliothecaire-form");
-        return "template";
+        // model.addAttribute("contentPage", "");
+        return "back-office/bibliothecaire-form";
     }
 
     @PostMapping("/login")
