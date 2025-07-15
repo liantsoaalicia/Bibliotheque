@@ -64,4 +64,8 @@ public class PretService {
         return pretRepository.findPretsEnCoursByAdherant(adherant);
     }
 
+    public List<Pret> findByExemplaireId(Integer exemplaireId) {
+        return pretRepository.findByExemplaireId(exemplaireId);
+    }
+
 }

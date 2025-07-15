@@ -34,5 +34,9 @@ public class ExemplaireService {
         return exemplaireRepository.findExemplairesDisponibles();
     }
 
+    public List<Exemplaire> findByLivreId(Integer livreId) {
+        return exemplaireRepository.findByLivreId(livreId);
+    }
+
 
 }

@@ -16,6 +16,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.format.annotation.DateTimeFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
+import com.bibliotheque.models.Exemplaire;
+import com.bibliotheque.models.Pret;
+import com.bibliotheque.services.ExemplaireService;
+import com.bibliotheque.services.PretService;
 
 @Controller
 @RequestMapping("/livre")
@@ -25,13 +36,18 @@ public class LivreController {
     private final AuteurService auteurService;
     private final MaisonEditionService maisonEditionService;
     private final GenreLitteraireService genreLitteraireService;
+    private final ExemplaireService exemplaireService;
+    private final PretService pretService;
    
     public LivreController(LivreService livreService, AuteurService auteurService, 
-                           MaisonEditionService maisonEditionService, GenreLitteraireService genreLitteraireService) {
+                           MaisonEditionService maisonEditionService, GenreLitteraireService genreLitteraireService,
+                           ExemplaireService exemplaireService, PretService pretService) {
         this.livreService = livreService;
         this.auteurService = auteurService;
         this.maisonEditionService = maisonEditionService;
         this.genreLitteraireService = genreLitteraireService;
+        this.exemplaireService = exemplaireService;
+        this.pretService = pretService;
     }
 
     @GetMapping("/list")
@@ -94,4 +110,68 @@ public class LivreController {
         return "redirect:/livre/list";
     }
 
+    private boolean isExemplaireDisponibleADate(Exemplaire exemplaire, Date date) {
+        List<Pret> prets = pretService.findByExemplaireId(exemplaire.getId());
+        for (Pret pret : prets) {
+            if (pret.getDateRetour() == null) {
+                Date dateEmprunt = pret.getDateEmprunt();
+                Date dateRetourPrevue = pret.getDateRetourPrevue();
+                
+                if (dateEmprunt != null && dateRetourPrevue != null) {
+                    if ((date.equals(dateEmprunt) || date.after(dateEmprunt)) && 
+                        (date.equals(dateRetourPrevue) || date.before(dateRetourPrevue))) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    // http://localhost:8080/livre/availability/1?date=2025-07-20
+    @GetMapping("/availability/{id}")
+    @ResponseBody
+    public Map<String, Object> checkLivreAvailability(
+            @PathVariable Integer id,
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        Livre livre = livreService.findById(id);
+        if (livre == null) {
+            response.put("error", "Livre non trouvé");
+            return response;
+        }
+        
+        Map<String, Object> livreInfo = new HashMap<>();
+        livreInfo.put("id", livre.getId());
+        livreInfo.put("titre", livre.getTitre());
+        livreInfo.put("tag", livre.getTag());
+        livreInfo.put("edition", livre.getEdition());
+        livreInfo.put("ageRequis", livre.getAgeRequis());
+        livreInfo.put("auteur", livre.getAuteur().getNom());
+        livreInfo.put("genre", livre.getGenreLitteraire().getLibelle());
+        livreInfo.put("maisonEdition", livre.getMaisonEdition().getNom());
+        
+        List<Exemplaire> exemplaires = exemplaireService.findByLivreId(id);
+        List<Map<String, Object>> exemplairesInfo = new ArrayList<>();
+        
+        for(Exemplaire exemplaire : exemplaires) {
+            Map<String, Object> exemplaireInfo = new HashMap<>();
+            exemplaireInfo.put("id", exemplaire.getId());
+            exemplaireInfo.put("num_exemplaire", exemplaire.getNumExemplaire());
+            
+            boolean disponible = isExemplaireDisponibleADate(exemplaire, date);
+            exemplaireInfo.put("disponible", disponible);
+            exemplairesInfo.add(exemplaireInfo);
+        }
+        
+        response.put("livre", livreInfo);
+        response.put("exemplaires", exemplairesInfo);
+        return response;
+    }
+    
+   
+
+    
 }

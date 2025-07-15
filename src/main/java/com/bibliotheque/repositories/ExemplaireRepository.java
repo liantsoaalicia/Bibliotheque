@@ -19,4 +19,6 @@ public interface ExemplaireRepository extends JpaRepository<Exemplaire, Integer>
     
     @Query("SELECT e FROM Exemplaire e WHERE e.id NOT IN (SELECT r.exemplaire.id FROM Reservation r WHERE r.statut.id = 1) AND e.id NOT IN (SELECT p.exemplaire.id FROM Pret p WHERE p.dateRetour IS NULL)")
     List<Exemplaire> findExemplairesDisponibles();
+
+    List<Exemplaire> findByLivreId(Integer livreId);
 }

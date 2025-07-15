@@ -13,10 +13,16 @@ import com.bibliotheque.models.Reservation;
 import com.bibliotheque.services.ReservationService;
 import com.bibliotheque.services.StatutService;
 import com.bibliotheque.models.Statut;
+import com.bibliotheque.models.TypePret;
 import com.bibliotheque.models.Exemplaire;
+import com.bibliotheque.models.Pret;
+import com.bibliotheque.models.PretConfig;
 import com.bibliotheque.services.ExemplaireService;
+import com.bibliotheque.services.PretConfigService;
+import com.bibliotheque.services.PretService;
 import com.bibliotheque.models.Adherant;
 import java.util.List;
+import java.util.Calendar;
 import java.util.Date;
 
 @Controller
@@ -26,11 +32,16 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final StatutService statutService;
     private final ExemplaireService exemplaireService;
+    private final PretConfigService pretConfigService;
+    private final PretService pretService;
 
-    public ReservationController(ReservationService reservationService, StatutService statutService, ExemplaireService exemplaireService) {
+    public ReservationController(ReservationService reservationService, StatutService statutService, 
+    ExemplaireService exemplaireService, PretConfigService pretConfigService, PretService pretService) {
         this.reservationService = reservationService;
         this.statutService = statutService;
         this.exemplaireService = exemplaireService;
+        this.pretConfigService = pretConfigService;
+        this.pretService = pretService;
     }
 
     @GetMapping("/form")
@@ -67,6 +78,7 @@ public class ReservationController {
         return "back-office/template";
     }
 
+    // qd on valide, tode mivadika pret
     @GetMapping("/valider/{id}")
     public String validerReservation(@PathVariable("id") Integer id, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         Reservation reservation = reservationService.findById(id);
@@ -76,7 +88,28 @@ public class ReservationController {
             reservation.setDateStatut(new Date());
             reservationService.save(reservation);
             redirectAttributes.addFlashAttribute("message", "Reservation validee");
+
+            Pret pret = new Pret();
+            pret.setAdherant(reservation.getAdherant());
+            pret.setDateEmprunt(new Date());
+            pret.setExemplaire(reservation.getExemplaire());
+            
+            TypePret typePret = new TypePret();
+            typePret.setId(1);
+            pret.setTypePret(typePret);
+
+            PretConfig pretconfig = pretConfigService.findByProfil(reservation.getAdherant().getProfil());
+            int nbJourPret = pretconfig.getNbJourPret();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(pret.getDateEmprunt());
+            cal.add(Calendar.DAY_OF_MONTH, nbJourPret);
+            Date nouvelleDateRetourPrevue = cal.getTime();
+
+            pret.setDateRetourPrevue(nouvelleDateRetourPrevue);
+
+            pretService.save(pret);
         } 
+
         return "redirect:/reservation/list-en-cours";
     }
 
