@@ -17,6 +17,7 @@ import com.bibliotheque.models.TypePret;
 import com.bibliotheque.models.Exemplaire;
 import com.bibliotheque.models.Pret;
 import com.bibliotheque.models.PretConfig;
+import com.bibliotheque.services.AdherantService;
 import com.bibliotheque.services.ExemplaireService;
 import com.bibliotheque.services.PretConfigService;
 import com.bibliotheque.services.PretService;
@@ -34,14 +35,17 @@ public class ReservationController {
     private final ExemplaireService exemplaireService;
     private final PretConfigService pretConfigService;
     private final PretService pretService;
+    private final AdherantService adherantService;
 
     public ReservationController(ReservationService reservationService, StatutService statutService, 
-    ExemplaireService exemplaireService, PretConfigService pretConfigService, PretService pretService) {
+    ExemplaireService exemplaireService, PretConfigService pretConfigService, PretService pretService,
+    AdherantService adherantService) {
         this.reservationService = reservationService;
         this.statutService = statutService;
         this.exemplaireService = exemplaireService;
         this.pretConfigService = pretConfigService;
         this.pretService = pretService;
+        this.adherantService = adherantService;
     }
 
     @GetMapping("/form")
@@ -87,27 +91,7 @@ public class ReservationController {
             reservation.setStatut(statut);
             reservation.setDateStatut(new Date());
             reservationService.save(reservation);
-            redirectAttributes.addFlashAttribute("message", "Reservation validee");
-
-            Pret pret = new Pret();
-            pret.setAdherant(reservation.getAdherant());
-            pret.setDateEmprunt(new Date());
-            pret.setExemplaire(reservation.getExemplaire());
-            
-            TypePret typePret = new TypePret();
-            typePret.setId(1);
-            pret.setTypePret(typePret);
-
-            PretConfig pretconfig = pretConfigService.findByProfil(reservation.getAdherant().getProfil());
-            int nbJourPret = pretconfig.getNbJourPret();
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(pret.getDateEmprunt());
-            cal.add(Calendar.DAY_OF_MONTH, nbJourPret);
-            Date nouvelleDateRetourPrevue = cal.getTime();
-
-            pret.setDateRetourPrevue(nouvelleDateRetourPrevue);
-
-            pretService.save(pret);
+            redirectAttributes.addFlashAttribute("message", "Reservation validee, veuillez faire un pret");
         } 
 
         return "redirect:/reservation/list-en-cours";
