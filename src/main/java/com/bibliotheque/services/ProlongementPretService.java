@@ -18,4 +18,9 @@ public class ProlongementPretService {
     public ProlongementPret findLastByPret(Pret pret) {
         return prolongementPretRepository.findLastByPret(pret).orElse(null);
     }
+
+    public int countProlongementsEnCoursByAdherant(Integer adherantId) {
+        // Compter les prolongements avec statut "En cours" pour cet adhérent
+        return prolongementPretRepository.countByPretAdherantIdAndStatutStatut(adherantId, "En cours");
+    }
 }

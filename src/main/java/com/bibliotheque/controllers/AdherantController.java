@@ -62,6 +62,7 @@ public class AdherantController {
     // abonne ou pas
     // quota ambiny
     // ses penalites par rapport a la date actuel
+    // http://localhost:8080/adherant/info/1?date=2025-07-20
     @GetMapping("/info/{id}")
     @ResponseBody
     public Map<String, Object> checkSituationAdherent(

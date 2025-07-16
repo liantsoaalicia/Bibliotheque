@@ -158,7 +158,7 @@ public class PretController {
         boolean aUnePenalite = adherantService.hasPenaliteAtDate(adherant.getId(), pret.getDateEmprunt());
 
         if(!quotaPasEncrAtteint) {
-            model.addAttribute("error", "Quota d'emprunts atteint pour cet adhérent.");
+            model.addAttribute("error", "Quota d'emprunts atteint pour cet adherent.");
             model.addAttribute("contentPage", "pret-form");
             return "back-office/template";
         } else if(exemplaireReserve) {
@@ -204,12 +204,28 @@ public class PretController {
         return "front-office/template";
     }
 
+    private int getQuotaProlongement(Integer profilId) {
+        switch (profilId) {
+            case 1: return 3;
+            case 2: return 5;
+            case 3: return 7;
+            default: return 3; 
+        }
+    }
+
     @PostMapping("/prolonger/{id}")
     public String prolongerPret(@PathVariable Integer id, 
     RedirectAttributes redirectAttributes, Model model) {
         Pret pret = pretService.findById(id).orElse(null);
         if (pret == null) {
             model.addAttribute("error", "Pret non trouvé");
+            return "redirect:/pret/en-cours";
+        }
+
+        int quotaMax = getQuotaProlongement(pret.getAdherant().getId());
+        int prolongementsEnCours = prolongementPretService.countProlongementsEnCoursByAdherant(pret.getAdherant().getId());
+        if (prolongementsEnCours >= quotaMax) {
+            redirectAttributes.addFlashAttribute("message", "Quota de prolongements atteint (" + quotaMax + " maximum)");
             return "redirect:/pret/en-cours";
         }
 
@@ -223,7 +239,7 @@ public class PretController {
         Date nouvelleDateRetourPrevue = cal.getTime();
 
         Statut statut = statutService.findByStatut("En cours");
-        String message = "Prolongement en cours de validation";
+        String message = "Prolongement ok";
 
         ProlongementPret prolongement = new ProlongementPret();
         prolongement.setPret(pret);
@@ -236,5 +252,6 @@ public class PretController {
         redirectAttributes.addFlashAttribute("message", message);
         return "redirect:/pret/en-cours";
     }
+
 
 }
