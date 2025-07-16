@@ -142,6 +142,15 @@ public class PretController {
         return "redirect:/pret/list";
     }
 
+    private int getQuotaProlongement(Integer profilId) {
+        switch (profilId) {
+            case 1: return 3;
+            case 2: return 5;
+            case 3: return 7;
+            default: return 3; 
+        }
+    }
+
     @PostMapping("/save")
     public String save(@ModelAttribute Pret pret, Model model) {
         Adherant adherant = adherantService.findById(pret.getAdherant().getId());
@@ -204,14 +213,7 @@ public class PretController {
         return "front-office/template";
     }
 
-    private int getQuotaProlongement(Integer profilId) {
-        switch (profilId) {
-            case 1: return 3;
-            case 2: return 5;
-            case 3: return 7;
-            default: return 3; 
-        }
-    }
+  
 
     @PostMapping("/prolonger/{id}")
     public String prolongerPret(@PathVariable Integer id, 
